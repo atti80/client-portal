@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import OnboardingForm from "./form";
+import { redirect } from "next/navigation";
 
-export default async function RootPage() {
+export default async function OnboardingPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,7 +16,7 @@ export default async function RootPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!membership) redirect("/onboarding");
+  if (membership) redirect("/dashboard");
 
-  redirect("/dashboard");
+  return <OnboardingForm />;
 }
