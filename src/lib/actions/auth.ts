@@ -15,7 +15,7 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: { full_name },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm?next=/onboarding`,
     },
   });
 
@@ -59,4 +59,23 @@ export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export async function requireAuth() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  const { data: membership } = await supabase
+    .from("memberships")
+    .select("org_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!membership) redirect("/onboarding");
+
+  return { user, orgId: membership.org_id };
 }

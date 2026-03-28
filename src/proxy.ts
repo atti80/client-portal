@@ -1,7 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
+  if (
+    request.nextUrl.pathname.startsWith("/auth/confirm") ||
+    request.nextUrl.pathname.startsWith("/auth/invite") ||
+    request.nextUrl.pathname.startsWith("/complete-profile")
+  ) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
