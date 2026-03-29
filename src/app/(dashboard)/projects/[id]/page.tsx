@@ -16,6 +16,18 @@ type ProjectMember = {
   } | null;
 };
 
+type Comment = {
+  id: string;
+  body: string;
+  created_at: string;
+  user_id: string;
+  users: {
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+};
+
 type Deliverable = {
   id: string;
   title: string;
@@ -25,6 +37,7 @@ type Deliverable = {
   created_at: string;
   uploaded_by: string;
   users: { full_name: string | null; email: string } | null;
+  comments: Comment[];
 };
 
 export default async function ProjectPage({
@@ -62,7 +75,11 @@ export default async function ProjectPage({
   const { data: deliverables } = (await adminClient
     .from("deliverables")
     .select(
-      "id, title, file_name, file_url, status, created_at, uploaded_by, users(full_name, email)"
+      `
+      id, title, file_name, file_url, status, created_at, uploaded_by,
+      users(full_name, email),
+      comments(id, body, created_at, user_id, users(full_name, email, avatar_url))
+    `
     )
     .eq("project_id", id)
     .order("created_at", { ascending: false })) as {

@@ -9,8 +9,21 @@ import {
   getDeliverableDownloadUrl,
 } from "@/lib/actions/deliverables";
 import { DeliverableUploadForm } from "./DeliverableUploadForm";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { formatDate } from "@/lib/utils";
 import type { DeliverableStatus } from "@/lib/types/database.types";
+
+type Comment = {
+  id: string;
+  body: string;
+  created_at: string;
+  user_id: string;
+  users: {
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+};
 
 type Deliverable = {
   id: string;
@@ -21,6 +34,7 @@ type Deliverable = {
   created_at: string;
   uploaded_by: string;
   users: { full_name: string | null; email: string } | null;
+  comments: Comment[];
 };
 
 type Props = {
@@ -49,7 +63,19 @@ export function DeliverableList({
   userRole,
 }: Props) {
   const [showUpload, setShowUpload] = useState(false);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(
+    new Set()
+  );
   const router = useRouter();
+
+  function toggleComments(deliverableId: string) {
+    setExpandedComments((prev) => {
+      const next = new Set(prev);
+      if (next.has(deliverableId)) next.delete(deliverableId);
+      else next.add(deliverableId);
+      return next;
+    });
+  }
 
   async function handleDownload(fileUrl: string) {
     const { url, error } = await getDeliverableDownloadUrl(fileUrl);
@@ -124,69 +150,91 @@ export function DeliverableList({
             const uploaderName =
               d.users?.full_name || d.users?.email || "Unknown";
             const canDelete = d.uploaded_by === currentUserId || isOwner;
+            const commentsExpanded = expandedComments.has(d.id);
+            const commentCount = d.comments.length;
             return (
-              <div
-                key={d.id}
-                className="flex items-start justify-between py-3 gap-4"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-medium text-stone-900">
-                      {d.title}
+              <div key={d.id} className="py-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-stone-900">
+                        {d.title}
+                      </p>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyles[d.status]}`}
+                      >
+                        {statusLabels[d.status]}
+                      </span>
+                    </div>
+                    <p className="text-xs text-stone-400 mt-0.5">
+                      {d.file_name} · Uploaded by {uploaderName} ·{" "}
+                      {formatDate(d.created_at)}
                     </p>
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyles[d.status]}`}
-                    >
-                      {statusLabels[d.status]}
-                    </span>
                   </div>
-                  <p className="text-xs text-stone-400 mt-0.5">
-                    {d.file_name} · Uploaded by {uploaderName} ·{" "}
-                    {formatDate(d.created_at)}
-                  </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleDownload(d.file_url)}
+                      className="text-xs text-stone-500 hover:text-stone-900 transition-colors"
+                    >
+                      Download
+                    </button>
+                    {d.status !== "approved" && (
+                      <button
+                        onClick={() => handleStatusChange(d.id, "approved")}
+                        className="text-xs text-green-600 hover:text-green-700 transition-colors"
+                      >
+                        Approve
+                      </button>
+                    )}
+                    {d.status !== "revision_requested" && (
+                      <button
+                        onClick={() =>
+                          handleStatusChange(d.id, "revision_requested")
+                        }
+                        className="text-xs text-amber-600 hover:text-amber-700 transition-colors"
+                      >
+                        Request revision
+                      </button>
+                    )}
+                    {d.status !== "pending" && isOwnerOrMember && (
+                      <button
+                        onClick={() => handleStatusChange(d.id, "pending")}
+                        className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
+                      >
+                        Reset
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(d.id, d.title)}
+                        className="text-xs text-stone-400 hover:text-red-600 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => handleDownload(d.file_url)}
-                    className="text-xs text-stone-500 hover:text-stone-900 transition-colors"
-                  >
-                    Download
-                  </button>
-                  {d.status !== "approved" && (
-                    <button
-                      onClick={() => handleStatusChange(d.id, "approved")}
-                      className="text-xs text-green-600 hover:text-green-700 transition-colors"
-                    >
-                      Approve
-                    </button>
-                  )}
-                  {d.status !== "revision_requested" && (
-                    <button
-                      onClick={() =>
-                        handleStatusChange(d.id, "revision_requested")
-                      }
-                      className="text-xs text-amber-600 hover:text-amber-700 transition-colors"
-                    >
-                      Request revision
-                    </button>
-                  )}
-                  {d.status !== "pending" && isOwnerOrMember && (
-                    <button
-                      onClick={() => handleStatusChange(d.id, "pending")}
-                      className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
-                    >
-                      Reset
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(d.id, d.title)}
-                      className="text-xs text-stone-400 hover:text-red-600 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
+
+                <button
+                  onClick={() => toggleComments(d.id)}
+                  className="text-xs text-stone-400 hover:text-stone-600 transition-colors mt-2"
+                >
+                  {commentsExpanded
+                    ? "Hide comments"
+                    : commentCount > 0
+                      ? `${commentCount} comment${commentCount !== 1 ? "s" : ""}`
+                      : "Add comment"}
+                </button>
+
+                {commentsExpanded && (
+                  <div className="mt-3 pl-4 border-l border-stone-100">
+                    <CommentSection
+                      deliverableId={d.id}
+                      comments={d.comments}
+                      currentUserId={currentUserId}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
