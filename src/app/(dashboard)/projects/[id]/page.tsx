@@ -3,6 +3,8 @@ import { requireAuth } from "@/lib/actions/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
 import { ProjectActions } from "./actions-menu";
+import { DeliverableList } from "@/components/deliverables/DeliverableList";
+import type { DeliverableStatus } from "@/lib/types/database.types";
 
 type ProjectMember = {
   role: string;
@@ -12,6 +14,17 @@ type ProjectMember = {
     email: string;
     avatar_url: string | null;
   } | null;
+};
+
+type Deliverable = {
+  id: string;
+  title: string;
+  file_name: string;
+  file_url: string;
+  status: DeliverableStatus;
+  created_at: string;
+  uploaded_by: string;
+  users: { full_name: string | null; email: string } | null;
 };
 
 export default async function ProjectPage({
@@ -45,6 +58,16 @@ export default async function ProjectPage({
     .from("project_members")
     .select("role, users(id, full_name, email, avatar_url)")
     .eq("project_id", id)) as { data: ProjectMember[] | null };
+
+  const { data: deliverables } = (await adminClient
+    .from("deliverables")
+    .select(
+      "id, title, file_name, file_url, status, created_at, uploaded_by, users(full_name, email)"
+    )
+    .eq("project_id", id)
+    .order("created_at", { ascending: false })) as {
+    data: Deliverable[] | null;
+  };
 
   const isOwnerOrMember = ["owner", "member"].includes(membership.role);
 
@@ -86,14 +109,15 @@ export default async function ProjectPage({
         <div className="flex flex-wrap gap-2">
           {members?.map((m) => {
             const u = m.users;
-            const name = u?.full_name || u?.email || "Unknown";
+            if (!u) return null;
+            const name = u.full_name || u.email;
             return (
               <div
-                key={u?.id}
+                key={u.id}
                 className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-full px-3 py-1"
               >
                 <div className="w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-medium overflow-hidden">
-                  {u?.avatar_url ? (
+                  {u.avatar_url ? (
                     <img
                       src={u.avatar_url}
                       alt={name}
@@ -112,19 +136,12 @@ export default async function ProjectPage({
       </div>
 
       <div className="bg-white rounded-lg border border-stone-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-medium text-stone-500 uppercase tracking-wider">
-            Deliverables
-          </p>
-          {isOwnerOrMember && (
-            <button className="text-xs text-stone-500 hover:text-stone-900 transition-colors">
-              + Upload file
-            </button>
-          )}
-        </div>
-        <p className="text-sm text-stone-400 text-center py-6">
-          No deliverables yet — file uploads coming on Day 5.
-        </p>
+        <DeliverableList
+          projectId={project.id}
+          deliverables={deliverables ?? []}
+          currentUserId={user.id}
+          userRole={membership.role}
+        />
       </div>
     </div>
   );
