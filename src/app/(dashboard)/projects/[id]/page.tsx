@@ -4,9 +4,21 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
 import { ProjectActions } from "./actions-menu";
 import { DeliverableList } from "@/components/deliverables/DeliverableList";
+import { ProjectTeam } from "@/components/projects/ProjectTeam";
 import type { DeliverableStatus } from "@/lib/types/database.types";
 
 type ProjectMember = {
+  role: string;
+  users: {
+    id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+};
+
+type OrgMember = {
+  user_id: string;
   role: string;
   users: {
     id: string;
@@ -72,6 +84,18 @@ export default async function ProjectPage({
     .select("role, users(id, full_name, email, avatar_url)")
     .eq("project_id", id)) as { data: ProjectMember[] | null };
 
+  const { data: orgMembers } = (await adminClient
+    .from("memberships")
+    .select("user_id, role, users(id, full_name, email, avatar_url)")
+    .eq("org_id", orgId)) as { data: OrgMember[] | null };
+
+  const projectMemberIds = new Set(
+    members?.map((m) => m.users?.id).filter((id): id is string => Boolean(id))
+  );
+  const availableMembers =
+    orgMembers?.filter((m) => m.users && !projectMemberIds.has(m.users.id)) ??
+    [];
+
   const { data: deliverables } = (await adminClient
     .from("deliverables")
     .select(
@@ -87,6 +111,7 @@ export default async function ProjectPage({
   };
 
   const isOwnerOrMember = ["owner", "member"].includes(membership.role);
+  const isOwner = membership.role === "owner";
 
   return (
     <div className="max-w-4xl">
@@ -120,36 +145,13 @@ export default async function ProjectPage({
       </div>
 
       <div className="bg-white rounded-lg border border-stone-200 p-4 mb-6">
-        <p className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-3">
-          Team
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {members?.map((m) => {
-            const u = m.users;
-            if (!u) return null;
-            const name = u.full_name || u.email;
-            return (
-              <div
-                key={u.id}
-                className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-full px-3 py-1"
-              >
-                <div className="w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-medium overflow-hidden">
-                  {u.avatar_url ? (
-                    <img
-                      src={u.avatar_url}
-                      alt={name}
-                      className="w-5 h-5 object-cover"
-                    />
-                  ) : (
-                    name[0]?.toUpperCase()
-                  )}
-                </div>
-                <span className="text-xs text-stone-700">{name}</span>
-                <span className="text-xs text-stone-400">{m.role}</span>
-              </div>
-            );
-          })}
-        </div>
+        <ProjectTeam
+          projectId={project.id}
+          members={members ?? []}
+          availableMembers={availableMembers}
+          currentUserId={user.id}
+          isOwner={isOwner}
+        />
       </div>
 
       <div className="bg-white rounded-lg border border-stone-200 p-4">

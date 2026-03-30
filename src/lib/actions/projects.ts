@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAuth } from "@/lib/actions/auth";
-import type { ProjectStatus } from "@/lib/types/database.types";
+import type { MemberRole, ProjectStatus } from "@/lib/types/database.types";
 
 export async function createProject(formData: FormData) {
   const { user, orgId } = await requireAuth();
@@ -143,4 +143,62 @@ export async function deleteProject(projectId: string) {
 
   revalidatePath("/projects");
   redirect("/projects");
+}
+
+export async function addProjectMember(
+  projectId: string,
+  userId: string,
+  role: MemberRole
+) {
+  const { orgId } = await requireAuth();
+  const adminClient = createAdminClient();
+
+  // Verify the user being added is an org member
+  const { data: orgMembership } = await adminClient
+    .from("memberships")
+    .select("role")
+    .eq("org_id", orgId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!orgMembership) {
+    return { error: "This user is not a member of your workspace." };
+  }
+
+  const { error } = await adminClient
+    .from("project_members")
+    .insert({ project_id: projectId, user_id: userId, role });
+
+  if (error) return { error: "Failed to add member. Please try again." };
+
+  revalidatePath(`/projects/${projectId}`);
+  return { error: null };
+}
+
+export async function removeProjectMember(projectId: string, userId: string) {
+  const { user } = await requireAuth();
+  const adminClient = createAdminClient();
+
+  // Can't remove the project owner
+  const { data: membership } = await adminClient
+    .from("project_members")
+    .select("role")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (membership?.role === "owner") {
+    return { error: "Cannot remove the project owner." };
+  }
+
+  const { error } = await adminClient
+    .from("project_members")
+    .delete()
+    .eq("project_id", projectId)
+    .eq("user_id", userId);
+
+  if (error) return { error: "Failed to remove member. Please try again." };
+
+  revalidatePath(`/projects/${projectId}`);
+  return { error: null };
 }
