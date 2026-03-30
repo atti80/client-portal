@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAuth } from "@/lib/actions/auth";
 import type { MemberRole } from "@/lib/types/database.types";
+import { revalidatePath } from "next/cache";
 
 export async function inviteMember(formData: FormData) {
   const { orgId } = await requireAuth();
@@ -38,6 +39,16 @@ export async function inviteMember(formData: FormData) {
     if (existingMembership) {
       return { error: "This person is already a member of your workspace." };
     }
+
+    // User exists — add them directly, no email needed
+    const { error } = await adminClient
+      .from("memberships")
+      .insert({ org_id: orgId, user_id: existingUser.id, role });
+
+    if (error) return { error: "Failed to add member. Please try again." };
+
+    revalidatePath("/settings/members");
+    return { error: null };
   }
 
   // Check if there's already a pending invitation for this email
