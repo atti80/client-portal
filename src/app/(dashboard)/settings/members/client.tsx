@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDate, getInitials } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type Member = {
   id: string;
@@ -55,6 +56,7 @@ const roleBadgeStyles: Record<string, string> = {
 export function MembersClient({ currentUserId, members, invitations }: Props) {
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<"member" | "client">("member");
+  const router = useRouter();
 
   const currentUserRole = members.find(
     (m) => m.users.id === currentUserId
@@ -77,7 +79,10 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
     if (!confirm(`Remove ${name} from the workspace?`)) return;
     const result = await removeMember(userId);
     if (result?.error) toast.error(result.error);
-    else toast.success("Member removed.");
+    else {
+      toast.success("Member removed.");
+      router.refresh();
+    }
   }
 
   async function handleRoleChange(userId: string, newRole: string) {
@@ -229,7 +234,7 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
                 key={invitation.id}
                 className="flex items-center gap-3 px-4 py-3 bg-white"
               >
-                <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 text-xs flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 text-xs shrink-0">
                   ?
                 </div>
                 <div className="flex-1 min-w-0">
