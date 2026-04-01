@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { signup } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -10,18 +10,18 @@ import { Label } from "@/components/ui/label";
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setLoading(true);
-    const result = await signup(formData);
-    setLoading(false);
-    if (result?.error) {
-      setError(result.error);
-    } else {
-      setSuccess(true);
-    }
+    startTransition(async () => {
+      const result = await signup(formData);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        setSuccess(true);
+      }
+    });
   }
 
   if (success) {
@@ -133,10 +133,10 @@ export default function SignupPage() {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-stone-900 hover:bg-stone-700 text-white mt-2"
         >
-          {loading ? "Creating account..." : "Create account"}
+          {isPending ? "Creating account..." : "Create account"}
         </Button>
       </form>
 

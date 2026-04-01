@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { completeProfile } from "@/lib/actions/complete-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +8,16 @@ import { Label } from "@/components/ui/label";
 
 export function CompleteProfileForm() {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setLoading(true);
-    const result = await completeProfile(formData);
-    setLoading(false);
-    if (result?.error) setError(result.error);
+    startTransition(async () => {
+      const result = await completeProfile(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    });
   }
 
   return (
@@ -73,10 +75,10 @@ export function CompleteProfileForm() {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="w-full bg-stone-900 hover:bg-stone-700 text-white"
           >
-            {loading ? "Saving..." : "Complete setup"}
+            {isPending ? "Saving..." : "Complete setup"}
           </Button>
         </form>
       </div>

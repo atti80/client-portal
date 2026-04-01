@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { createOrg } from "@/lib/actions/organization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 
 export default function OnboardingForm() {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [orgName, setOrgName] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const slug = orgName
     .toLowerCase()
@@ -20,12 +20,12 @@ export default function OnboardingForm() {
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setLoading(true);
-    const result = await createOrg(formData);
-    setLoading(false);
-    if (result?.error) {
-      setError(result.error);
-    }
+    startTransition(async () => {
+      const result = await createOrg(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    });
   }
 
   return (
@@ -79,10 +79,10 @@ export default function OnboardingForm() {
 
           <Button
             type="submit"
-            disabled={loading || !orgName.trim()}
+            disabled={isPending || !orgName.trim()}
             className="w-full bg-stone-900 hover:bg-stone-700 text-white"
           >
-            {loading ? "Creating workspace..." : "Create workspace"}
+            {isPending ? "Creating workspace..." : "Create workspace"}
           </Button>
         </form>
       </div>

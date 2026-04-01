@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   inviteMember,
@@ -54,9 +54,9 @@ const roleBadgeStyles: Record<string, string> = {
 };
 
 export function MembersClient({ currentUserId, members, invitations }: Props) {
-  const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<"member" | "client">("member");
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const currentUserRole = members.find(
     (m) => m.users.id === currentUserId
@@ -65,14 +65,14 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
 
   async function handleInvite(formData: FormData) {
     formData.set("role", role);
-    setLoading(true);
-    const result = await inviteMember(formData);
-    setLoading(false);
-    if (result?.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Invitation sent successfully.");
-    }
+    startTransition(async () => {
+      const result = await inviteMember(formData);
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Invitation sent successfully.");
+      }
+    });
   }
 
   async function handleRemove(userId: string, name: string) {
@@ -142,10 +142,10 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
             </div>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="bg-primary hover:bg-primary/90 text-white"
             >
-              {loading ? "Sending..." : "Send invite"}
+              {isPending ? "Sending..." : "Send invite"}
             </Button>
           </form>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { login } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,16 @@ import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setLoading(true);
-    const result = await login(formData);
-    setLoading(false);
-    if (result?.error) {
-      setError(result.error);
-    }
+    startTransition(async () => {
+      const result = await login(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    });
   }
 
   return (
@@ -83,10 +83,10 @@ export default function LoginPage() {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="w-full bg-stone-900 hover:bg-stone-700 text-white mt-2"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {isPending ? "Signing in..." : "Sign in"}
         </Button>
       </form>
     </div>
