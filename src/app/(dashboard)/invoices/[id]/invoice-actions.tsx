@@ -34,7 +34,7 @@ export function InvoiceActions({ invoiceId, currentStatus }: Props) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-sm text-stone-500 hover:text-stone-900 border border-stone-200 rounded-md px-3 py-1.5 transition-colors">
+      <DropdownMenuTrigger className="bg-secondary text-sm text-stone-100 hover:bg-secondary/90 hover:text-stone-200 border border-stone-200 rounded-md px-3 py-1.5 transition-colors">
         Actions
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

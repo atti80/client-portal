@@ -31,7 +31,7 @@ export default async function ProjectsPage() {
         <h1 className="text-xl font-semibold text-stone-900">Projects</h1>
         <Link
           href="/projects/new"
-          className="text-sm bg-stone-900 hover:bg-stone-700 text-white px-4 py-2 rounded-md transition-colors"
+          className="text-sm bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md transition-colors"
         >
           New project
         </Link>
@@ -101,7 +101,7 @@ function ProjectGroup({
                 </p>
               )}
             </div>
-            <div className="ml-4 flex-shrink-0 text-right">
+            <div className="ml-4 shrink-0 text-right">
               {project.due_date && (
                 <p className="text-xs text-stone-400">
                   Due {formatDate(project.due_date)}

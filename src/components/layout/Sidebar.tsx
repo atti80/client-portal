@@ -45,11 +45,11 @@ export function Sidebar({ org, userRole }: Props) {
               href={href}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
                 active
-                  ? "bg-stone-100 text-stone-900 font-medium"
+                  ? "bg-secondary text-white font-medium"
                   : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"
               }`}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className="w-4 h-4 shrink-0" />
               {label}
             </Link>
           );
@@ -71,7 +71,7 @@ export function Sidebar({ org, userRole }: Props) {
                 href={href}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
                   active
-                    ? "bg-stone-100 text-stone-900 font-medium"
+                    ? "bg-secondary text-white font-medium"
                     : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >

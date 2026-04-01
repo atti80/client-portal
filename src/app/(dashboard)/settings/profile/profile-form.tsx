@@ -126,7 +126,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <Button
             type="submit"
             disabled={profileLoading}
-            className="bg-stone-900 hover:bg-stone-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-white"
           >
             {profileLoading ? "Saving..." : "Save changes"}
           </Button>
@@ -172,7 +172,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           <Button
             type="submit"
             disabled={passwordLoading}
-            className="bg-stone-900 hover:bg-stone-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-white"
           >
             {passwordLoading ? "Updating..." : "Update password"}
           </Button>

@@ -143,7 +143,7 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-stone-900 hover:bg-stone-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-white"
             >
               {loading ? "Sending..." : "Send invite"}
             </Button>
@@ -165,7 +165,7 @@ export function MembersClient({ currentUserId, members, invitations }: Props) {
                 key={member.id}
                 className="flex items-center gap-3 px-4 py-3 bg-white"
               >
-                <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-medium flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 text-xs font-medium shrink-0">
                   {member.users.avatar_url ? (
                     <img
                       src={member.users.avatar_url}

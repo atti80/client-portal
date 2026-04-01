@@ -73,7 +73,7 @@ export function NewProjectForm() {
         <Button
           type="submit"
           disabled={loading}
-          className="bg-stone-900 hover:bg-stone-700 text-white"
+          className="bg-primary hover:bg-primary/90 text-white"
         >
           {loading ? "Creating..." : "Create project"}
         </Button>

@@ -25,7 +25,7 @@ export function SettingsNav({ isOwner }: Props) {
               <li key={href}>
                 <Link
                   href={href}
-                  className={`block px-3 py-2 rounded-md text-sm transition-colors ${active ? "bg-stone-100 text-stone-900 font-medium" : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"}`}
+                  className={`block px-3 py-2 rounded-md text-sm transition-colors ${active ? "bg-secondary text-white font-medium" : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"}`}
                 >
                   {label}
                 </Link>
