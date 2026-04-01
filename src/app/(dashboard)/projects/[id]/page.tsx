@@ -6,6 +6,7 @@ import { ProjectActions } from "./actions-menu";
 import { DeliverableList } from "@/components/deliverables/DeliverableList";
 import { ProjectTeam } from "@/components/projects/ProjectTeam";
 import type { DeliverableStatus } from "@/lib/types/database.types";
+import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 
 type ProjectMember = {
   role: string;
@@ -121,11 +122,7 @@ export default async function ProjectPage({
             <h1 className="text-xl font-semibold text-stone-900">
               {project.name}
             </h1>
-            <span
-              className={`text-xs font-medium px-2 py-0.5 rounded-full ${project.status === "active" ? "bg-green-50 text-green-700" : project.status === "completed" ? "bg-stone-100 text-stone-600" : "bg-stone-100 text-stone-400"}`}
-            >
-              {project.status}
-            </span>
+            <ProjectStatusBadge status={project.status} />
           </div>
           {project.description && (
             <p className="text-sm text-stone-500">{project.description}</p>

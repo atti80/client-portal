@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/actions/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
+import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 
 export default async function DashboardPage() {
   const { user, orgId } = await requireAuth();
@@ -86,11 +87,7 @@ export default async function DashboardPage() {
                       Due {formatDate(project.due_date)}
                     </span>
                   )}
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${project.status === "active" ? "bg-green-50 text-green-700" : project.status === "completed" ? "bg-stone-100 text-stone-600" : "bg-stone-100 text-stone-400"}`}
-                  >
-                    {project.status}
-                  </span>
+                  <ProjectStatusBadge status={project.status} />
                 </div>
               </Link>
             ))}

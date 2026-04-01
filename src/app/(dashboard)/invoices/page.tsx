@@ -3,12 +3,7 @@ import { requireAuth } from "@/lib/actions/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import type { InvoiceStatus } from "@/lib/types/database.types";
-
-const statusStyles = {
-  draft: "bg-stone-100 text-stone-600",
-  sent: "bg-blue-50 text-blue-700",
-  paid: "bg-green-50 text-green-700",
-};
+import { InvoiceStatusBadge } from "@/components/invoices/InvoiceStatusBadge";
 
 type InvoiceWithRelations = {
   id: string;
@@ -131,11 +126,7 @@ export default async function InvoicesPage() {
                   <p className="text-sm font-medium text-stone-900">
                     {invoice.number}
                   </p>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyles[invoice.status]}`}
-                  >
-                    {invoice.status}
-                  </span>
+                  <InvoiceStatusBadge status={invoice.status} />
                 </div>
                 <p className="text-xs text-stone-400 mt-0.5">
                   {invoice.projects?.name ?? "No project"}

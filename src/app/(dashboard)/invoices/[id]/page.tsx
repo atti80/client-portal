@@ -5,12 +5,7 @@ import { formatDate, formatCurrency } from "@/lib/utils";
 import type { InvoiceStatus } from "@/lib/types/database.types";
 import { InvoiceActions } from "./invoice-actions";
 import { InvoicePDFButton } from "./pdf-button";
-
-const statusStyles = {
-  draft: "bg-stone-100 text-stone-600",
-  sent: "bg-blue-50 text-blue-700",
-  paid: "bg-green-50 text-green-700",
-};
+import { InvoiceStatusBadge } from "@/components/invoices/InvoiceStatusBadge";
 
 type InvoiceDetail = {
   id: string;
@@ -78,11 +73,7 @@ export default async function InvoicePage({
           <h1 className="text-xl font-semibold text-stone-900">
             {invoice.number}
           </h1>
-          <span
-            className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyles[invoice.status]}`}
-          >
-            {invoice.status}
-          </span>
+          <InvoiceStatusBadge status={invoice.status} />
         </div>
         <div className="flex items-center gap-2">
           <InvoicePDFButton invoiceId={id} />
