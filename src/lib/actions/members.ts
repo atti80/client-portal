@@ -77,7 +77,7 @@ export async function inviteMember(formData: FormData) {
   const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
     email,
     {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite`,
+      redirectTo: `${process.env.SITE_URL}/auth/invite`,
       data: { org_id: orgId, role },
     }
   );
