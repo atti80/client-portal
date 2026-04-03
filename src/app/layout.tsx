@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Rubik } from "next/font/google";
+import { Rubik } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"] });
 const rubik = Rubik({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ClientFlow",
   description: "Manage your clients, projects and invoices in one place",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
